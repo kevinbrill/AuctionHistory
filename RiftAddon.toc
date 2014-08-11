@@ -1,0 +1,29 @@
+Identifier = "AuctionHistory"
+
+Name = "Auction History"
+
+NameShort = "AH"
+
+Description = "Harvests historical prices for a fixed set of items"
+
+Author = "Kevin Brill"
+Website = "http://blog.kevinbrill.com"
+Email = "kevin.brill@gmail.com"
+
+Version = "0.1.0"
+
+Environment = "2.6"
+
+RunOnStartup = {
+	"AuctionHistory.lua",
+}
+
+--@no-lib-strip@
+Embed = {
+	["libs/LibString"] = true,
+}
+--@end-no-lib-strip@
+
+Dependencies = {
+	LibString = { "required", "before" },
+}
