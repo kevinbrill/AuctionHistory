@@ -7,7 +7,7 @@ function _ah.search(handle, args)
   local arg1 = unpack(string.split(args, "%s+", true))
     
   if(#args <= 0) then
-    Command.Console.Display("v0000000000000000", true, "Incorrect usage", true)
+    Command.Console.Display("v0000000000000000", true, "Usage: /ah <search text>", false)
     return
   end
     
@@ -24,8 +24,6 @@ function _ah.search(handle, args)
     text = arg1
   }
   
-  _ah.searching = true
-  
   Command.Auction.Scan(params)
   
 end
@@ -36,27 +34,56 @@ function _ah.ScanComplete(handle, criteria, auctions)
     return
   end    
   
-  local now = Inspect.Time.Server()
-  local lastWeek = now - 604800  
+  local itemTypes = {}
   
   for auctionID in pairs(auctions) do
       
     local details = Inspect.Auction.Detail(auctionID)
         
-    print(Utility.Serialize.Inline(details["itemType"]))
+    itemTypes[details["itemType"]] = true;
+    
+    --[[
+    local auction = {
+      seller = details["seller"],
+      buyout = details["buyout"],
+      unitPrice = details["buyout"] / details["itemStack"]
+    }
+  
+    print(Utility.Serialize.Inline(auction))
+      ]]
       
-    local now = Inspect.Time.Server()
-    local lastWeek = now - 604800
-    
-    Command.Auction.Analyze(details["itemType"], lastWeek, now)
-    
   end
 
+  local now = Inspect.Time.Server()
+  local lastWeek = now - 604800
+          
+  for key, value in pairs(itemTypes) do
+    
+    Command.Auction.Analyze(key, lastWeek, now)
+    
+  end
+  
 end
 
 function _ah.OnStatsComplete(handle, itemType, data)
   
-  --print(Utility.Serialize.Inline(data))
+  local result = {}
+  local i = 1
+  
+  for k, stat in pairs(data) do
+  
+    local display = {
+      date = os.date("%x", stat.time),
+      average = stat.priceAverage,
+      volume = stat.volume
+    }
+  
+    print(Utility.Serialize.Inline(display))
+    result[i] = display
+    
+    i = i + 1
+    
+  end
   
 end
 
