@@ -34,7 +34,7 @@ function _ah.search(handle, args)
   local params = {
     type = "search",
     index = 0,
-    text = arg1
+    text = args
   }
   
   Command.Auction.Scan(params)
@@ -76,6 +76,8 @@ function _ah.OnStatsComplete(handle, itemType, data)
   local result = {
     id = item.id,
     name = item.name,
+    category = item.category,
+    rarity = item.rarity,
     history = {}
   }
   
