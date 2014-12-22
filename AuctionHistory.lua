@@ -2,6 +2,16 @@ local _ah = {
   isScanning = false
 }
 
+local addonInfo, Internal = ...
+
+function _ah.OnVariablesLoaded(identifier)
+    
+  if(AuctionHistory_Prices == nil) then 
+    AuctionHistory_Prices = {}
+  end
+  
+end
+
 function _ah.search(handle, args)
   
   args = string.trim(args)
@@ -44,17 +54,7 @@ function _ah.ScanComplete(handle, criteria, auctions)
     local details = Inspect.Auction.Detail(auctionID)
         
     itemTypes[details["itemType"]] = true;
-    
-    --[[
-    local auction = {
-      seller = details["seller"],
-      buyout = details["buyout"],
-      unitPrice = details["buyout"] / details["itemStack"]
-    }
-  
-    print(Utility.Serialize.Inline(auction))
-      ]]
-      
+         
   end
 
   local now = Inspect.Time.Server()
@@ -88,24 +88,14 @@ function _ah.OnStatsComplete(handle, itemType, data)
       average = stat.priceAverage,
       volume = stat.volume
     }
-  
---    if( _ah.isScanning == true ) then
-      
---      print(Utility.Serialize.Inline(itemType))
---      print(Utility.Serialize.Inline(display))
-      
---      local item = Inspect.Item.Detail(itemType)
---      print(Utility.Serialize.Inline(item))
-      
---      _ah.isScanning = false
-      
---    end
     
     result.history[i] = display
     
     i = i + 1
     
   end
+  
+  AuctionHistory_Prices[result.id] = result;
   
   if( _ah.isScanning == true ) then
     
@@ -117,6 +107,9 @@ function _ah.OnStatsComplete(handle, itemType, data)
   
 end
 
+Command.Console.Display("general", false, string.format("%s v%s loaded...", addonInfo.nameShort, addonInfo.toc.Version), false)
+
 Command.Event.Attach(Command.Slash.Register("ah"), _ah.search, "List all achievements")
 Command.Event.Attach(Event.Auction.Scan, _ah.ScanComplete, "Callback function when the auction scan is complete")
 Command.Event.Attach(Event.Auction.Statistics, _ah.OnStatsComplete, "Callback function when the auction statistics call is complete")
+Command.Event.Attach(Event.Addon.SavedVariables.Load.End, _ah.OnVariablesLoaded, "Callback function when the addon's saved variables have been loaded")

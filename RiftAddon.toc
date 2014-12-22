@@ -2,7 +2,7 @@ Identifier = "AuctionHistory"
 
 Name = "Auction History"
 
-NameShort = "AH"
+NameShort = "Auction History"
 
 Description = "Harvests historical prices for a fixed set of items"
 
@@ -12,14 +12,14 @@ Email = "kevin.brill@gmail.com"
 
 Version = "0.1.0"
 
-Environment = "2.6"
+Environment = "3.0"
 
 RunOnStartup = {
 	"AuctionHistory.lua",
 }
 
 SavedVariables = {
-  AuctionHistory_prices = "account"
+  AuctionHistory_Prices = "account"
 }
 
 --@no-lib-strip@
