@@ -1,4 +1,5 @@
 local _ah = {
+  isScanning = false
 }
 
 function _ah.search(handle, args)
@@ -18,6 +19,8 @@ function _ah.search(handle, args)
     return
   end
 
+  _ah.isScanning = true;
+  
   local params = {
     type = "search",
     index = 0,
@@ -67,7 +70,15 @@ end
 
 function _ah.OnStatsComplete(handle, itemType, data)
   
-  local result = {}
+  -- Inspect the item to pull some useful information
+  local item = Inspect.Item.Detail(itemType)
+  
+  local result = {
+    id = item.id,
+    name = item.name,
+    history = {}
+  }
+  
   local i = 1
   
   for k, stat in pairs(data) do
@@ -78,10 +89,29 @@ function _ah.OnStatsComplete(handle, itemType, data)
       volume = stat.volume
     }
   
-    print(Utility.Serialize.Inline(display))
-    result[i] = display
+--    if( _ah.isScanning == true ) then
+      
+--      print(Utility.Serialize.Inline(itemType))
+--      print(Utility.Serialize.Inline(display))
+      
+--      local item = Inspect.Item.Detail(itemType)
+--      print(Utility.Serialize.Inline(item))
+      
+--      _ah.isScanning = false
+      
+--    end
+    
+    result.history[i] = display
     
     i = i + 1
+    
+  end
+  
+  if( _ah.isScanning == true ) then
+    
+    print(Utility.Serialize.Inline(result))
+  
+    _ah.isScanning = false
     
   end
   

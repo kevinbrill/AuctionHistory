@@ -18,6 +18,10 @@ RunOnStartup = {
 	"AuctionHistory.lua",
 }
 
+SavedVariables = {
+  AuctionHistory_prices = "account"
+}
+
 --@no-lib-strip@
 Embed = {
 	["libs/LibString"] = true,
