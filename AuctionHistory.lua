@@ -1,5 +1,6 @@
 local _ah = {
-  isScanning = false
+  totalScans = 0,
+  addonInitiated = false
 }
 
 local addonInfo, Internal = ...
@@ -29,13 +30,14 @@ function _ah.search(handle, args)
     return
   end
 
-  _ah.isScanning = true;
-  
   local params = {
     type = "search",
     index = 0,
     text = args
   }
+  
+  -- The addon initiated the scan.  Toggle the flag
+  _ah.addonInitiated = true;
   
   Command.Auction.Scan(params)
   
@@ -43,18 +45,31 @@ end
 
 function _ah.ScanComplete(handle, criteria, auctions)
   
-  if( criteria["type"] ~= "search" ) then
+  if( ( criteria["type"] ~= "search" ) or ( _ah.addonInitiated == false ) ) then
     return
   end    
   
   local itemTypes = {}
   
+  _ah.totalScans = 0
+  
   for auctionID in pairs(auctions) do
       
+    -- Get the item detail for the current auction ID
     local details = Inspect.Auction.Detail(auctionID)
         
-    itemTypes[details["itemType"]] = true;
-         
+    -- Check to see if we've encountered this item type before
+    if( itemTypes[details["itemType"]] == nil ) then
+    
+      -- We haven't.  Flag it for search and increment the number
+      --  of items on which we're going to search
+      itemTypes[details["itemType"]] = true;
+    
+      -- Increment the total number of stat calls to be made
+      _ah.totalScans = _ah.totalScans + 1
+    
+  end
+  
   end
 
   local now = Inspect.Time.Server()
@@ -99,11 +114,18 @@ function _ah.OnStatsComplete(handle, itemType, data)
   
   AuctionHistory_Prices[result.id] = result;
   
-  if( _ah.isScanning == true ) then
-    
-    print(Utility.Serialize.Inline(result))
+  if( _ah.totalScans <= 0 ) then
+    return
+  end
   
-    _ah.isScanning = false
+  Command.Console.Display("general", false, string.format("Collected price history for %s", result.name), false)
+    
+  _ah.totalScans = _ah.totalScans - 1
+  
+  -- Reset the addon initiated scan flag
+  if( _ah.totalScans == 0 ) then
+    
+    _ah.addonInitiated = false
     
   end
   
