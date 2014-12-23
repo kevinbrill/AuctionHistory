@@ -1,9 +1,39 @@
 local _ah = {
   totalScans = 0,
-  addonInitiated = false
+  addonInitiated = false,
+  shard = ''
 }
 
 local addonInfo, Internal = ...
+
+function getPriceHistory( item )
+  
+  local result = AuctionHistory_Prices[item.id]
+  
+  if( result == nil ) then
+    
+    result = {
+      id = item.id,
+      name = item.name,
+      category = item.category,
+      rarity = item.rarity,
+      shards = {}
+    }
+      
+  end
+  
+  if(result.shards[_ah.shard] == nil) then
+    
+    result.shards[_ah.shard] = {
+      time = Inspect.Time.Server(),
+      history = {}
+    }
+    
+  end    
+  
+  return result
+  
+end
 
 function _ah.OnVariablesLoaded(identifier)
     
@@ -35,6 +65,9 @@ function _ah.search(handle, args)
     index = 0,
     text = args
   }
+  
+  -- Pull the shard that the search was initially kicked off from
+  _ah.shard = Inspect.Shard().name
   
   -- The addon initiated the scan.  Toggle the flag
   _ah.addonInitiated = true;
@@ -68,7 +101,7 @@ function _ah.ScanComplete(handle, criteria, auctions)
       -- Increment the total number of stat calls to be made
       _ah.totalScans = _ah.totalScans + 1
     
-  end
+    end
   
   end
 
@@ -88,13 +121,7 @@ function _ah.OnStatsComplete(handle, itemType, data)
   -- Inspect the item to pull some useful information
   local item = Inspect.Item.Detail(itemType)
   
-  local result = {
-    id = item.id,
-    name = item.name,
-    category = item.category,
-    rarity = item.rarity,
-    history = {}
-  }
+  local result = getPriceHistory(item)
   
   local i = 1
   
@@ -106,7 +133,8 @@ function _ah.OnStatsComplete(handle, itemType, data)
       volume = stat.volume
     }
     
-    result.history[i] = display
+    result.shards[_ah.shard].time = Inspect.Time.Server()
+    result.shards[_ah.shard].history[i] = display
     
     i = i + 1
     
