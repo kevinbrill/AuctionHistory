@@ -106,11 +106,11 @@ function _ah.ScanComplete(handle, criteria, auctions)
   end
 
   local now = Inspect.Time.Server()
-  local lastWeek = now - 604800
+  local lastMonth = now - 3024000
           
   for key, value in pairs(itemTypes) do
     
-    Command.Auction.Analyze(key, lastWeek, now)
+    Command.Auction.Analyze(key, lastMonth, now)
     
   end
   
